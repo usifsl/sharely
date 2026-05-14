@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sharely — Give. Receive. Repeat.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --green: #2D6A4F;--green-light: #52B788;--green-pale: #D8F3DC;--green-mid: #40916C;
+    --amber: #E9973A;--amber-pale: #FEF3E2;
+    --cream: #FAFAF7;--cream-dark: #F0EFE8;
+    --text: #1A1A18;--text-muted: #6B6B65;--text-light: #9E9E97;
+    --border: #E0DDD4;--white: #FFFFFF;--red: #C0392B;--blue: #2980B9;
+    --radius: 14px;--radius-sm: 8px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);--shadow-hover: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:15px;line-height:1.5;min-height:100vh;}
+  .serif{font-family:'Fraunces',serif;}
+
+  nav{background:var(--white);border-bottom:1.5px solid var(--border);padding:0 20px;display:flex;align-items:center;height:60px;gap:14px;position:sticky;top:0;z-index:100;}
+  .logo{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:var(--green);cursor:pointer;flex-shrink:0;}
+  .logo span{color:var(--amber);}
+
+  /* LOCATION PICKER in NAV */
+  .loc-picker{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--border);border-radius:99px;cursor:pointer;transition:all 0.18s;background:var(--white);position:relative;flex-shrink:0;}
+  .loc-picker:hover{border-color:var(--green-light);background:var(--green-pale);}
+  .loc-picker i{color:var(--green);font-size:14px;}
+  .loc-picker .loc-text{font-size:13px;font-weight:500;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .loc-picker .caret{font-size:11px;color:var(--text-muted);}
+  .loc-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:8px;min-width:260px;z-index:200;box-shadow:var(--shadow-hover);}
+  .loc-dropdown.open{display:block;}
+  .loc-search-wrap{position:relative;margin-bottom:8px;}
+  .loc-search-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;}
+  .loc-search{width:100%;padding:8px 10px 8px 32px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--cream);}
+  .loc-search:focus{border-color:var(--green-light);}
+  .loc-section-label{font-size:11px;font-weight:600;color:var(--text-muted);padding:4px 8px 2px;letter-spacing:0.05em;}
+  .loc-option{padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;transition:background 0.12s;}
+  .loc-option:hover{background:var(--green-pale);}
+  .loc-option.selected{background:var(--green-pale);color:var(--green);font-weight:500;}
+  .loc-option i{font-size:13px;color:var(--text-muted);width:16px;text-align:center;}
+  .loc-option.selected i{color:var(--green);}
+  .loc-divider{height:1px;background:var(--border);margin:6px 0;}
+  .use-location-btn{width:100%;padding:8px;background:var(--green-pale);color:var(--green);border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s;margin-top:4px;}
+  .use-location-btn:hover{background:var(--green-pale);opacity:0.8;}
+
+  .nav-search{flex:1;max-width:320px;position:relative;}
+  .nav-search input{width:100%;height:38px;border:1.5px solid var(--border);border-radius:99px;padding:0 16px 0 38px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--cream);color:var(--text);outline:none;transition:border-color 0.2s;}
+  .nav-search input:focus{border-color:var(--green-light);}
+  .nav-search .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;}
+  .nav-links{display:flex;align-items:center;gap:4px;margin-left:auto;}
+  .nav-btn{padding:7px 14px;border-radius:99px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.18s;}
+  .nav-btn.ghost{background:transparent;color:var(--text-muted);}
+  .nav-btn.ghost:hover{background:var(--cream-dark);color:var(--text);}
+  .nav-btn.primary{background:var(--green);color:var(--white);}
+  .nav-btn.primary:hover{background:var(--green-mid);}
+  .nav-btn.outline{background:transparent;border:1.5px solid var(--green);color:var(--green);}
+  .nav-btn.outline:hover{background:var(--green-pale);}
+  .nav-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.15s;color:var(--text-muted);font-size:16px;border:none;background:transparent;position:relative;}
+  .nav-icon:hover{background:var(--cream-dark);color:var(--text);}
+  .nav-icon .badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:var(--amber);border-radius:50%;font-size:10px;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;}
+
+  .page{display:none;min-height:calc(100vh - 60px);}
+  .page.active{display:block;}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--green-pale) 0%,#B7E4C7 50%,var(--cream) 100%);padding:56px 24px 44px;text-align:center;}
+  .hero-pill{display:inline-flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--green-light);border-radius:99px;padding:5px 16px;font-size:13px;color:var(--green);font-weight:500;margin-bottom:18px;}
+  .hero h1{font-family:'Fraunces',serif;font-size:50px;font-weight:600;line-height:1.1;color:var(--text);margin-bottom:14px;}
+  .hero h1 em{font-style:italic;color:var(--green);}
+  .hero p{font-size:16px;color:var(--text-muted);max-width:460px;margin:0 auto 28px;}
+
+  /* HERO LOCATION BAR */
+  .hero-search-bar{display:flex;align-items:center;background:var(--white);border:2px solid var(--border);border-radius:99px;max-width:600px;margin:0 auto 12px;overflow:hidden;box-shadow:var(--shadow);}
+  .hero-search-bar .hs-loc{display:flex;align-items:center;gap:8px;padding:0 18px;height:52px;border-right:1.5px solid var(--border);cursor:pointer;flex-shrink:0;transition:background 0.15s;min-width:160px;}
+  .hero-search-bar .hs-loc:hover{background:var(--green-pale);}
+  .hero-search-bar .hs-loc i{color:var(--green);font-size:15px;}
+  .hero-search-bar .hs-loc .hs-loc-text{font-size:14px;font-weight:500;}
+  .hero-search-bar .hs-loc .hs-loc-sub{font-size:11px;color:var(--text-muted);}
+  .hero-search-bar input{flex:1;height:52px;border:none;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:transparent;outline:none;}
+  .hero-search-bar button{margin:6px;padding:0 20px;height:40px;background:var(--green);color:white;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;flex-shrink:0;transition:background 0.15s;}
+  .hero-search-bar button:hover{background:var(--green-mid);}
+
+  /* HERO LOCATION DROPDOWN */
+  .hero-loc-dropdown{display:none;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px;max-width:380px;margin:0 auto 16px;box-shadow:var(--shadow-hover);}
+  .hero-loc-dropdown.open{display:block;}
+
+  .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .btn-lg{padding:12px 26px;border-radius:99px;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.18s;display:inline-flex;align-items:center;gap:8px;}
+  .btn-lg.green{background:var(--green);color:white;}
+  .btn-lg.green:hover{background:var(--green-mid);transform:translateY(-1px);}
+  .btn-lg.light{background:var(--white);color:var(--text);border:1.5px solid var(--border);}
+  .btn-lg.light:hover{border-color:var(--green-light);}
+
+  .stats-bar{background:var(--white);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;justify-content:center;gap:40px;}
+  .stat{text-align:center;}
+  .stat-num{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--green);}
+  .stat-label{font-size:12px;color:var(--text-muted);}
+
+  .section{padding:36px 24px;max-width:1100px;margin:0 auto;}
+  .section-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;}
+  .section-title{font-family:'Fraunces',serif;font-size:24px;font-weight:600;}
+  .section-link{font-size:13px;color:var(--green);cursor:pointer;font-weight:500;}
+  .section-link:hover{text-decoration:underline;}
+
+  .cats{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;}
+  .cat-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 6px;text-align:center;cursor:pointer;transition:all 0.18s;}
+  .cat-card:hover{border-color:var(--green-light);background:var(--green-pale);transform:translateY(-2px);}
+  .cat-icon{font-size:26px;margin-bottom:6px;}
+  .cat-name{font-size:12px;font-weight:500;}
+  .cat-count{font-size:11px;color:var(--text-muted);}
+
+  .listings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+  .listing-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative;}
+  .listing-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:transparent;}
+  .listing-emoji{font-size:54px;display:flex;align-items:center;justify-content:center;height:160px;background:var(--cream-dark);}
+  .listing-body{padding:11px 13px 13px;}
+  .listing-title{font-weight:500;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .listing-cat{font-size:12px;color:var(--green);font-weight:500;}
+  .listing-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+  .listing-loc{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px;}
+  .listing-time{font-size:11px;color:var(--text-light);}
+  .free-badge{position:absolute;top:8px;left:8px;background:var(--green);color:white;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;}
+  .fav-btn{position:absolute;top:7px;right:7px;width:30px;height:30px;border-radius:50%;background:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted);transition:all 0.15s;box-shadow:0 1px 6px rgba(0,0,0,0.12);}
+  .fav-btn:hover{color:var(--red);}
+  .fav-btn.active{color:var(--red);}
+
+  .filter-bar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:sticky;top:60px;z-index:50;}
+
+  /* EXPLORE LOCATION BAR */
+  .explore-loc-bar{display:flex;align-items:center;gap:10px;padding:10px 24px;background:var(--cream-dark);border-bottom:1px solid var(--border);}
+  .explore-loc-bar .elb-inner{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--border);border-radius:99px;padding:6px 14px;cursor:pointer;transition:border-color 0.15s;position:relative;}
+  .explore-loc-bar .elb-inner:hover{border-color:var(--green-light);}
+  .explore-loc-bar .elb-inner i{color:var(--green);font-size:13px;}
+  .explore-loc-bar .elb-inner span{font-size:13px;font-weight:500;}
+  .explore-loc-bar .elb-inner .caret{font-size:11px;color:var(--text-muted);}
+  .explore-loc-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:8px;min-width:260px;z-index:200;box-shadow:var(--shadow-hover);}
+  .explore-loc-dropdown.open{display:block;}
+  .radius-row{display:flex;align-items:center;gap:10px;padding:8px 8px 4px;}
+  .radius-row label{font-size:12px;color:var(--text-muted);white-space:nowrap;}
+  .radius-row input[type=range]{flex:1;}
+  .radius-row span{font-size:12px;font-weight:500;min-width:40px;color:var(--green);}
+  .filter-chip{padding:6px 13px;border-radius:99px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:var(--white);color:var(--text);transition:all 0.15s;white-space:nowrap;}
+  .filter-chip:hover{border-color:var(--green-light);}
+  .filter-chip.active{background:var(--green);color:white;border-color:var(--green);}
+
+  .detail-layout{display:grid;grid-template-columns:1fr 360px;gap:28px;max-width:1060px;margin:0 auto;padding:28px 24px;}
+  .detail-gallery{border-radius:var(--radius);overflow:hidden;background:var(--cream-dark);height:380px;display:flex;align-items:center;justify-content:center;font-size:96px;}
+  .detail-free{display:inline-flex;align-items:center;gap:6px;background:var(--green-pale);color:var(--green);border-radius:99px;padding:5px 14px;font-size:13px;font-weight:600;margin-bottom:10px;}
+  .detail-title{font-family:'Fraunces',serif;font-size:28px;font-weight:600;line-height:1.2;margin-bottom:8px;}
+  .detail-meta{display:flex;gap:14px;margin-bottom:18px;font-size:13px;color:var(--text-muted);}
+  .detail-desc{color:var(--text-muted);line-height:1.7;margin-bottom:20px;}
+  .detail-actions{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+  .detail-btn{padding:13px;border-radius:var(--radius-sm);border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .detail-btn.primary{background:var(--green);color:white;}
+  .detail-btn.primary:hover{background:var(--green-mid);}
+  .detail-btn.secondary{background:var(--white);color:var(--text);border:1.5px solid var(--border);}
+  .detail-btn.secondary:hover{border-color:var(--green-light);}
+  .giver-card{background:var(--cream-dark);border-radius:var(--radius-sm);padding:14px;display:flex;gap:12px;align-items:center;}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:var(--green);flex-shrink:0;}
+  .giver-info h4{font-weight:500;font-size:14px;}
+  .giver-info .trust{font-size:12px;color:var(--green);font-weight:500;}
+  .stars{color:var(--amber);font-size:13px;}
+
+  .add-layout{max-width:660px;margin:0 auto;padding:28px 24px;}
+  .form-section{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:14px;}
+  .form-section h3{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin-bottom:14px;}
+  .form-group{margin-bottom:14px;}
+  .form-group label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:5px;}
+  .form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--cream);outline:none;transition:border-color 0.2s;}
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--green-light);background:var(--white);}
+  .form-group textarea{resize:vertical;min-height:90px;}
+  .photo-upload{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:28px;text-align:center;cursor:pointer;transition:all 0.18s;background:var(--cream);}
+  .photo-upload:hover{border-color:var(--green-light);background:var(--green-pale);}
+  .photo-upload i{font-size:30px;color:var(--text-muted);margin-bottom:8px;display:block;}
+  .photo-upload p{font-size:13px;color:var(--text-muted);}
+  .submit-btn{width:100%;padding:14px;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.18s;}
+  .submit-btn:hover{background:var(--green-mid);}
+  .cat-pills{display:flex;flex-wrap:wrap;gap:8px;}
+  .cat-pill{padding:6px 13px;border-radius:99px;border:1.5px solid var(--border);font-size:13px;cursor:pointer;transition:all 0.15s;background:var(--white);}
+  .cat-pill.selected{background:var(--green);color:white;border-color:var(--green);}
+
+  .profile-layout{max-width:880px;margin:0 auto;padding:28px 24px;}
+  .profile-header{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:26px;display:flex;gap:22px;align-items:center;margin-bottom:18px;}
+  .profile-avatar{width:78px;height:78px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:600;color:var(--green);flex-shrink:0;}
+  .profile-name{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin-bottom:3px;}
+  .profile-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .badge-pill{padding:4px 11px;border-radius:99px;font-size:12px;font-weight:500;}
+  .badge-pill.green{background:var(--green-pale);color:var(--green);}
+  .badge-pill.amber{background:var(--amber-pale);color:#9B6A10;}
+  .trust-score{background:var(--green);color:white;border-radius:var(--radius-sm);padding:12px 18px;text-align:center;min-width:90px;}
+  .trust-score .num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;}
+  .trust-score .lbl{font-size:11px;opacity:0.8;}
+  .profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+  .pstat{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;}
+  .pstat-num{font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:var(--green);}
+  .pstat-lbl{font-size:12px;color:var(--text-muted);}
+
+  .chat-layout{display:grid;grid-template-columns:290px 1fr;height:calc(100vh - 60px);}
+  .chat-list{border-right:1.5px solid var(--border);background:var(--white);overflow-y:auto;}
+  .chat-list-header{padding:14px 16px;border-bottom:1px solid var(--border);font-family:'Fraunces',serif;font-size:18px;font-weight:600;}
+  .chat-item{padding:12px 14px;cursor:pointer;transition:background 0.15s;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--border);}
+  .chat-item:hover{background:var(--cream);}
+  .chat-item.active{background:var(--green-pale);}
+  .chat-item-info{flex:1;min-width:0;}
+  .chat-item-name{font-weight:500;font-size:13px;}
+  .chat-item-msg{font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-item-time{font-size:11px;color:var(--text-light);flex-shrink:0;}
+  .chat-unread{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
+  .chat-main{display:flex;flex-direction:column;}
+  .chat-header{padding:12px 18px;border-bottom:1.5px solid var(--border);display:flex;gap:10px;align-items:center;background:var(--white);}
+  .chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;background:var(--cream);}
+  .msg{max-width:65%;}
+  .msg.them{align-self:flex-start;}
+  .msg.me{align-self:flex-end;}
+  .msg-bubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;}
+  .msg.them .msg-bubble{background:var(--white);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
+  .msg.me .msg-bubble{background:var(--green);color:white;border-bottom-right-radius:4px;}
+  .msg-time{font-size:11px;color:var(--text-light);margin-top:3px;padding:0 4px;}
+  .msg.me .msg-time{text-align:right;}
+  .chat-input-bar{padding:12px 18px;border-top:1.5px solid var(--border);display:flex;gap:10px;background:var(--white);}
+  .chat-input{flex:1;padding:9px 15px;border:1.5px solid var(--border);border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:var(--cream);}
+  .chat-input:focus{border-color:var(--green-light);background:var(--white);}
+  .chat-send{width:38px;height:38px;border-radius:50%;background:var(--green);border:none;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;}
+  .chat-send:hover{background:var(--green-mid);}
+
+  .notif-layout{max-width:620px;margin:0 auto;padding:28px 24px;}
+  .notif-item{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;}
+  .notif-item.unread{border-color:var(--green-light);background:var(--green-pale);}
+  .notif-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+  .notif-icon.green{background:var(--green-pale);color:var(--green);}
+  .notif-icon.amber{background:var(--amber-pale);color:var(--amber);}
+  .notif-icon.blue{background:#E8F4FD;color:var(--blue);}
+  .notif-text p{font-size:14px;line-height:1.5;}
+  .notif-text .notif-time{font-size:12px;color:var(--text-muted);margin-top:3px;}
+
+  .admin-layout{max-width:1060px;margin:0 auto;padding:22px;}
+  .admin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .admin-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:18px;}
+  .admin-card-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:var(--green);}
+  .admin-card-lbl{font-size:13px;color:var(--text-muted);margin-top:2px;}
+  .admin-card-trend{font-size:12px;color:var(--green);margin-top:5px;}
+  .admin-table{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:18px;}
+  .admin-table-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .admin-table-header h3{font-weight:600;font-size:15px;}
+  table{width:100%;border-collapse:collapse;}
+  th{background:var(--cream);padding:9px 14px;text-align:left;font-size:12px;color:var(--text-muted);font-weight:500;border-bottom:1px solid var(--border);}
+  td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--cream);}
+  .status-pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+  .status-pill.active{background:var(--green-pale);color:var(--green);}
+  .status-pill.pending{background:var(--amber-pale);color:#9B6A10;}
+  .status-pill.flagged{background:#FDECEA;color:var(--red);}
+  .action-btns{display:flex;gap:6px;}
+  .action-btn{padding:4px 10px;border-radius:99px;border:1.5px solid var(--border);font-size:12px;cursor:pointer;background:white;transition:all 0.15s;}
+  .action-btn:hover{background:var(--cream-dark);}
+  .action-btn.danger{color:var(--red);border-color:var(--red);}
+  .action-btn.danger:hover{background:#FDECEA;}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--white);border-radius:var(--radius);padding:30px;width:390px;max-width:95vw;position:relative;}
+  .modal h2{font-family:'Fraunces',serif;font-size:24px;font-weight:600;margin-bottom:6px;}
+  .modal .sub{font-size:14px;color:var(--text-muted);margin-bottom:22px;}
+  .modal .form-group{margin-bottom:12px;}
+  .modal .form-group input{background:var(--cream);width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;}
+  .modal .form-group input:focus{border-color:var(--green-light);}
+  .modal-btn{width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-top:4px;transition:background 0.15s;}
+  .modal-btn:hover{background:var(--green-mid);}
+  .modal-switch{text-align:center;font-size:13px;color:var(--text-muted);margin-top:14px;}
+  .modal-switch a{color:var(--green);cursor:pointer;font-weight:500;}
+  .modal-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-muted);}
+
+  .request-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center;}
+  .request-modal.open{display:flex;}
+  .request-modal .inner{background:white;border-radius:var(--radius);padding:26px;width:410px;max-width:95vw;}
+  .request-modal h3{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-bottom:8px;}
+  .request-modal textarea{width:100%;padding:11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:vertical;min-height:95px;margin-top:12px;}
+  .request-modal textarea:focus{border-color:var(--green-light);}
+
+  .how{background:var(--white);border-top:1px solid var(--border);padding:44px 24px;}
+  .how-inner{max-width:860px;margin:0 auto;text-align:center;}
+  .how h2{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin-bottom:32px;}
+  .how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .how-step{text-align:center;}
+  .how-icon{width:56px;height:56px;border-radius:50%;background:var(--green-pale);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;}
+  .how-step h3{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin-bottom:7px;}
+  .how-step p{font-size:14px;color:var(--text-muted);line-height:1.6;}
+
+  .back-btn{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:99px;border:1.5px solid var(--border);background:var(--white);font-size:13px;cursor:pointer;margin:14px 24px;transition:all 0.15s;color:var(--text);}
+  .back-btn:hover{border-color:var(--green-light);}
+  .page-title{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:4px;}
+  .page-sub{color:var(--text-muted);font-size:14px;margin-bottom:22px;}
+
+  .admin-nav{display:flex;gap:4px;margin-bottom:18px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:4px;width:fit-content;}
+  .admin-nav-btn{padding:6px 16px;border-radius:6px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);transition:all 0.15s;}
+  .admin-nav-btn.active{background:var(--green);color:white;}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:white;padding:11px 22px;border-radius:99px;font-size:14px;z-index:9999;transition:transform 0.3s;display:flex;align-items:center;gap:8px;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast-icon{color:var(--green-light);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="showPage('home')">Share<span>ly</span></div>
+
+  <!-- LOCATION PICKER -->
+  <div class="loc-picker" id="nav-loc-btn" onclick="toggleNavLoc(event)">
+    <i class="fa fa-map-marker-alt"></i>
+    <div>
+      <div class="loc-text" id="nav-loc-text">Warsaw</div>
+    </div>
+    <i class="fa fa-chevron-down caret" id="nav-loc-caret"></i>
+    <div class="loc-dropdown" id="nav-loc-dropdown" onclick="event.stopPropagation()">
+      <div class="loc-search-wrap">
+        <i class="fa fa-search"></i>
+        <input class="loc-search" type="text" placeholder="Search city or district..." oninput="filterLocOptions(this.value,'nav')" id="nav-loc-search">
+      </div>
+      <button class="use-location-btn" onclick="useMyLocation('nav')"><i class="fa fa-crosshairs"></i> Use my current location</button>
+      <div class="loc-divider"></div>
+      <div class="loc-section-label">POPULAR CITIES</div>
+      <div id="nav-loc-list"></div>
+    </div>
+  </div>
+
+  <div class="nav-search">
+    <i class="fa fa-search si"></i>
+    <input type="text" placeholder="Search free items...">
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn ghost" onclick="showPage('explore')"><i class="fa fa-compass"></i> Explore</button>
+    <div style="position:relative">
+      <button class="nav-icon" onclick="showPage('notifications')">
+        <i class="fa fa-bell"></i><span class="badge">3</span>
+      </button>
+    </div>
+    <div style="position:relative">
+      <button class="nav-icon" onclick="showPage('chat')">
+        <i class="fa fa-comment"></i><span class="badge">2</span>
+      </button>
+    </div>
+    <button class="nav-btn outline" onclick="openModal('login')"><i class="fa fa-user"></i> Sign in</button>
+    <button class="nav-btn primary" onclick="showPage('add')"><i class="fa fa-plus"></i> Give Away</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-pill"><i class="fa fa-leaf"></i> Free items · No strings attached</div>
+    <h1>Give what you <em>don't need</em>,<br>find what you do.</h1>
+    <p>Sharely connects neighbours to share items for free — reducing waste, building community.</p>
+
+    <!-- HERO SEARCH + LOCATION BAR -->
+    <div class="hero-search-bar">
+      <div class="hs-loc" onclick="toggleHeroLoc(event)" id="hero-loc-btn">
+        <i class="fa fa-map-marker-alt"></i>
+        <div>
+          <div class="hs-loc-sub" style="font-size:10px;color:var(--text-muted)">Location</div>
+          <div class="hs-loc-text" id="hero-loc-text">Warsaw</div>
+        </div>
+        <i class="fa fa-chevron-down" style="font-size:11px;color:var(--text-muted);margin-left:4px"></i>
+      </div>
+      <input type="text" placeholder="What are you looking for?">
+      <button onclick="showPage('explore')"><i class="fa fa-search"></i> Search</button>
+    </div>
+
+    <!-- HERO LOCATION DROPDOWN -->
+    <div class="hero-loc-dropdown" id="hero-loc-dropdown" onclick="event.stopPropagation()">
+      <div class="loc-search-wrap" style="margin-bottom:8px">
+        <i class="fa fa-search"></i>
+        <input class="loc-search" type="text" placeholder="Search city or district..." oninput="filterLocOptions(this.value,'hero')" id="hero-loc-search">
+      </div>
+      <button class="use-location-btn" onclick="useMyLocation('hero')"><i class="fa fa-crosshairs"></i> Use my current location</button>
+      <div class="loc-divider"></div>
+      <div class="loc-section-label">POPULAR CITIES</div>
+      <div id="hero-loc-list"></div>
+    </div>
+
+    <div class="hero-actions" style="margin-top:16px">
+      <button class="btn-lg green" onclick="showPage('add')"><i class="fa fa-gift"></i> Give Something Away</button>
+      <button class="btn-lg light" onclick="showPage('explore')"><i class="fa fa-search"></i> Browse Free Items</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">12,480</div><div class="stat-label">Items Given Away</div></div>
+    <div class="stat"><div class="stat-num">4,230</div><div class="stat-label">Active Members</div></div>
+    <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Happy Recipients</div></div>
+    <div class="stat"><div class="stat-num">2.4t</div><div class="stat-label">Waste Saved</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Browse Categories</div>
+    </div>
+    <div class="cats">
+      <div class="cat-card" onclick="filterAndExplore('Furniture')"><div class="cat-icon">🛋️</div><div class="cat-name">Furniture</div><div class="cat-count">342 items</div></div>
+      <div class="cat-card" onclick="filterAndExplore('Electronics')"><div class="cat-icon">📱</div><div class="cat-name">Electronics</div><div class="cat-count">218 items</div></div>
+      <div class="cat-card" onclick="filterAndExplore('Clothes')"><div class="cat-icon">👕</div><div class="cat-name">Clothes</div><div class="cat-count">567 items</div></div>
+      <div class="cat-card" onclick="filterAndExplore('Books')"><div class="cat-icon">📚</div><div class="cat-name">Books</div><div class="cat-count">423 items</div></div>
+      <div class="cat-card" onclick="filterAndExplore('Baby Items')"><div class="cat-icon">🍼</div><div class="cat-name">Baby Items</div><div class="cat-count">189 items</div></div>
+      <div class="cat-card" onclick="filterAndExplore('Appliances')"><div class="cat-icon">🍳</div><div class="cat-name">Appliances</div><div class="cat-count">134 items</div></div>
+      <div class="cat-card" onclick="filterAndExplore('Sports')"><div class="cat-icon">⚽</div><div class="cat-name">Sports</div><div class="cat-count">97 items</div></div>
+      <div class="cat-card" onclick="filterAndExplore('Miscellaneous')"><div class="cat-icon">📦</div><div class="cat-name">Other</div><div class="cat-count">284 items</div></div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:0">
+    <div class="section-header">
+      <div class="section-title">Recently Added Near <span id="home-city-label">Warsaw</span></div>
+      <span class="section-link" onclick="showPage('explore')">See all →</span>
+    </div>
+    <div class="listings-grid" id="home-listings"></div>
+  </div>
+
+  <div class="how">
+    <div class="how-inner">
+      <h2>How Sharely Works</h2>
+      <div class="how-steps">
+        <div class="how-step"><div class="how-icon"><i class="fa fa-camera"></i></div><h3>Post your item</h3><p>Take a photo, add a description and your location. Takes under 2 minutes.</p></div>
+        <div class="how-step"><div class="how-icon"><i class="fa fa-hand-pointer"></i></div><h3>Someone requests it</h3><p>Interested neighbours send you a message. You choose who receives it.</p></div>
+        <div class="how-step"><div class="how-icon"><i class="fa fa-heart"></i></div><h3>Pass it on for free</h3><p>Arrange pickup or drop-off. Zero cost, just community goodwill.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPLORE PAGE -->
+<div id="page-explore" class="page">
+  <!-- EXPLORE LOCATION BAR -->
+  <div class="explore-loc-bar">
+    <i class="fa fa-map-marker-alt" style="color:var(--green);font-size:14px"></i>
+    <span style="font-size:13px;color:var(--text-muted)">Showing items near</span>
+    <div style="position:relative">
+      <div class="elb-inner" onclick="toggleExploreLoc(event)" id="explore-loc-btn">
+        <i class="fa fa-map-marker-alt"></i>
+        <span id="explore-loc-text">Warsaw</span>
+        <i class="fa fa-chevron-down caret"></i>
+      </div>
+      <div class="explore-loc-dropdown" id="explore-loc-dropdown" onclick="event.stopPropagation()">
+        <div class="loc-search-wrap" style="margin-bottom:8px">
+          <i class="fa fa-search"></i>
+          <input class="loc-search" type="text" placeholder="Search city..." oninput="filterLocOptions(this.value,'explore')" id="explore-loc-search">
+        </div>
+        <button class="use-location-btn" onclick="useMyLocation('explore')"><i class="fa fa-crosshairs"></i> Use my current location</button>
+        <div class="loc-divider"></div>
+        <div class="loc-section-label">POPULAR CITIES</div>
+        <div id="explore-loc-list"></div>
+        <div class="loc-divider"></div>
+        <div class="radius-row">
+          <label>Radius</label>
+          <input type="range" min="1" max="100" value="25" step="1" id="radius-slider" oninput="document.getElementById('radius-val').textContent=this.value+'km'">
+          <span id="radius-val">25km</span>
+        </div>
+      </div>
+    </div>
+    <span style="font-size:13px;color:var(--text-muted);margin-left:4px">within <strong id="explore-radius-label">25km</strong></span>
+  </div>
+
+  <div class="filter-bar">
+    <span style="font-size:13px;font-weight:500;color:var(--text-muted);margin-right:4px">Filter:</span>
+    <button class="filter-chip active" onclick="setFilter(this,'all')">All</button>
+    <button class="filter-chip" onclick="setFilter(this,'Furniture')">🛋️ Furniture</button>
+    <button class="filter-chip" onclick="setFilter(this,'Electronics')">📱 Electronics</button>
+    <button class="filter-chip" onclick="setFilter(this,'Clothes')">👕 Clothes</button>
+    <button class="filter-chip" onclick="setFilter(this,'Books')">📚 Books</button>
+    <button class="filter-chip" onclick="setFilter(this,'Baby Items')">🍼 Baby Items</button>
+    <button class="filter-chip" onclick="setFilter(this,'Appliances')">🍳 Appliances</button>
+    <button class="filter-chip" onclick="setFilter(this,'Miscellaneous')">📦 Other</button>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="page-title">Browse Free Items</div>
+        <div class="page-sub" id="explore-count">Showing all 12 items near Warsaw</div>
+      </div>
+      <select style="padding:7px 13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;background:white;cursor:pointer;">
+        <option>Most recent</option>
+        <option>A–Z</option>
+        <option>Nearest first</option>
+      </select>
+    </div>
+    <div class="listings-grid" id="explore-listings"></div>
+  </div>
+</div>
+
+<!-- LISTING DETAIL PAGE -->
+<div id="page-detail" class="page">
+  <button class="back-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back</button>
+  <div class="detail-layout">
+    <div>
+      <div class="detail-gallery" id="detail-img">🛋️</div>
+      <div style="margin-top:14px;background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;">
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:500;">ITEM DETAILS</p>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;">
+          <div><span style="font-size:12px;color:var(--text-muted)">Category</span><p style="font-size:14px;font-weight:500" id="detail-cat-info">Furniture</p></div>
+          <div><span style="font-size:12px;color:var(--text-muted)">Condition</span><p style="font-size:14px;font-weight:500">Good</p></div>
+          <div><span style="font-size:12px;color:var(--text-muted)">Location</span><p style="font-size:14px;font-weight:500" id="detail-loc-info">Warsaw</p></div>
+          <div><span style="font-size:12px;color:var(--text-muted)">Posted</span><p style="font-size:14px;font-weight:500" id="detail-time-info">2 hours ago</p></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="detail-free"><i class="fa fa-gift"></i> 100% FREE</div>
+      <h1 class="detail-title" id="detail-title">Wooden Dining Table</h1>
+      <div class="detail-meta">
+        <span><i class="fa fa-map-marker-alt"></i> <span id="detail-location">Mokotów, Warsaw</span></span>
+        <span><i class="fa fa-clock"></i> <span id="detail-time">2 hours ago</span></span>
+      </div>
+      <p class="detail-desc" id="detail-desc">A beautiful solid wood dining table in great condition. Perfect for a family of 4–6. Minor scratches on the surface but structurally sound.</p>
+      <div class="detail-actions">
+        <button class="detail-btn primary" onclick="openRequestModal()"><i class="fa fa-hand-point-up"></i> Request This Item</button>
+        <button class="detail-btn secondary" onclick="showPage('chat')"><i class="fa fa-comment"></i> Message Giver</button>
+        <button class="detail-btn secondary" onclick="toggleFavDetail(this)"><i class="fa fa-heart" id="detail-fav-icon"></i> <span id="detail-fav-text">Save to Favourites</span></button>
+      </div>
+      <div class="giver-card">
+        <div class="avatar">MK</div>
+        <div class="giver-info" style="flex:1">
+          <h4>Marta Kowalska</h4>
+          <div class="stars">★★★★★</div>
+          <div class="trust">⬢ Trusted Giver · 23 items shared</div>
+        </div>
+        <button class="detail-btn secondary" style="padding:7px 13px;font-size:13px" onclick="showPage('profile')">Profile</button>
+      </div>
+      <div style="margin-top:12px;text-align:center">
+        <span style="font-size:12px;color:var(--text-light);cursor:pointer" onclick="showToast('Report submitted. Thank you.')"><i class="fa fa-flag"></i> Report this listing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LISTING PAGE -->
+<div id="page-add" class="page">
+  <div class="add-layout">
+    <div style="margin-bottom:18px"><div class="page-title">Give Something Away</div><div class="page-sub">Help a neighbour find something useful — completely free.</div></div>
+    <div class="form-section"><h3>📸 Photos</h3><div class="photo-upload" onclick="showToast('Photo upload ready!')"><i class="fa fa-camera"></i><p><strong>Add up to 6 photos</strong></p><p>Tap to upload from camera or gallery</p></div></div>
+    <div class="form-section">
+      <h3>📝 Item Details</h3>
+      <div class="form-group"><label>Title *</label><input type="text" placeholder="e.g. Wooden bookshelf, 3 shelves"></div>
+      <div class="form-group"><label>Description *</label><textarea placeholder="Describe the condition, dimensions, any wear. Be honest — it helps trust!"></textarea></div>
+      <div class="form-group"><label>Category *</label><div class="cat-pills"><div class="cat-pill" onclick="selectCat(this)">🛋️ Furniture</div><div class="cat-pill" onclick="selectCat(this)">📱 Electronics</div><div class="cat-pill" onclick="selectCat(this)">👕 Clothes</div><div class="cat-pill" onclick="selectCat(this)">📚 Books</div><div class="cat-pill" onclick="selectCat(this)">🍼 Baby Items</div><div class="cat-pill" onclick="selectCat(this)">🍳 Appliances</div><div class="cat-pill" onclick="selectCat(this)">⚽ Sports</div><div class="cat-pill" onclick="selectCat(this)">📦 Miscellaneous</div></div></div>
+      <div class="form-group"><label>Condition</label><select><option>Like new</option><option>Good</option><option>Fair</option><option>Worn</option></select></div>
+    </div>
+    <div class="form-section">
+      <h3>📍 Location</h3>
+      <div class="form-group">
+        <label>City / District *</label>
+        <div style="position:relative">
+          <i class="fa fa-map-marker-alt" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--green);font-size:14px"></i>
+          <input type="text" id="add-loc-input" style="padding-left:34px" placeholder="e.g. Mokotów, Warsaw" value="Warsaw, Poland" onclick="showAddLocSugg()">
+        </div>
+        <div id="add-loc-suggestions" style="display:none;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;margin-top:4px;overflow:hidden"></div>
+      </div>
+      <div class="form-group"><label>Pickup instructions</label><input type="text" placeholder="e.g. Collect from my building lobby"></div>
+    </div>
+    <div class="form-section">
+      <h3>⚙️ Preferences</h3>
+      <div class="form-group"><label>Available until</label><input type="date"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px"><input type="checkbox" id="anon" style="width:16px;height:16px;accent-color:var(--green)"><label for="anon" style="font-size:14px;cursor:pointer">Stay anonymous (hide my name from listing)</label></div>
+    </div>
+    <button class="submit-btn" onclick="submitListing()"><i class="fa fa-gift"></i> Post for Free</button>
+  </div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div id="page-profile" class="page">
+  <div class="profile-layout">
+    <div class="profile-header">
+      <div class="profile-avatar">MK</div>
+      <div style="flex:1">
+        <div class="profile-name">Marta Kowalska</div>
+        <div style="font-size:13px;color:var(--text-muted)">Member since January 2023 · Warsaw</div>
+        <div class="stars" style="margin-top:5px;font-size:14px">★★★★★ <span style="font-size:13px;color:var(--text-muted);font-weight:400">4.9 (47 reviews)</span></div>
+        <div class="profile-badges"><span class="badge-pill green">⬢ Trusted Giver</span><span class="badge-pill amber">🌱 Eco Champion</span><span class="badge-pill green">📦 23 items given</span><span class="badge-pill green">✅ Verified</span></div>
+      </div>
+      <div class="trust-score"><div class="num">94</div><div class="lbl">Trust Score</div></div>
+    </div>
+    <div class="profile-stats">
+      <div class="pstat"><div class="pstat-num">23</div><div class="pstat-lbl">Items Given</div></div>
+      <div class="pstat"><div class="pstat-num">5</div><div class="pstat-lbl">Items Received</div></div>
+      <div class="pstat"><div class="pstat-num">47</div><div class="pstat-lbl">Reviews</div></div>
+    </div>
+    <div class="section-header"><div class="section-title">Active Listings</div></div>
+    <div class="listings-grid" id="profile-listings"></div>
+  </div>
+</div>
+
+<!-- CHAT PAGE -->
+<div id="page-chat" class="page">
+  <div class="chat-layout">
+    <div class="chat-list">
+      <div class="chat-list-header">Messages</div>
+      <div class="chat-item active"><div class="avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0">PN</div><div class="chat-item-info"><div style="display:flex;justify-content:space-between"><span class="chat-item-name">Piotr Nowak</span><span class="chat-item-time">2m</span></div><div class="chat-item-msg">Is the table still available?</div></div><div class="chat-unread"></div></div>
+      <div class="chat-item"><div class="avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;background:#EDE9F7;color:#5B4DB3">AW</div><div class="chat-item-info"><div style="display:flex;justify-content:space-between"><span class="chat-item-name">Anna Wiśniewska</span><span class="chat-item-time">1h</span></div><div class="chat-item-msg">Thank you so much! 🙏</div></div><div class="chat-unread"></div></div>
+      <div class="chat-item"><div class="avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0;background:#FEF3E2;color:#9B6A10">TB</div><div class="chat-item-info"><div style="display:flex;justify-content:space-between"><span class="chat-item-name">Tomasz B.</span><span class="chat-item-time">3h</span></div><div class="chat-item-msg">Can I pick it up tomorrow?</div></div></div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-header"><div class="avatar" style="width:38px;height:38px;font-size:14px;flex-shrink:0">PN</div><div><div style="font-weight:500;font-size:14px">Piotr Nowak</div><div style="font-size:12px;color:var(--green)">● Online now</div></div><div style="background:var(--cream-dark);border-radius:var(--radius-sm);padding:5px 11px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:5px;margin-left:auto"><i class="fa fa-tag"></i> Wooden Dining Table</div></div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg them"><div class="msg-bubble">Hi! Is the wooden dining table still available? 😊</div><div class="msg-time">14:32</div></div>
+        <div class="msg me"><div class="msg-bubble">Yes it's still available! Are you able to collect from Mokotów?</div><div class="msg-time">14:35</div></div>
+        <div class="msg them"><div class="msg-bubble">Absolutely, I'm in Mokotów too. Could I come Saturday morning?</div><div class="msg-time">14:36</div></div>
+        <div class="msg me"><div class="msg-bubble">Saturday works great! Let's say 10am?</div><div class="msg-time">14:38</div></div>
+        <div class="msg them"><div class="msg-bubble">Is the table still available?</div><div class="msg-time">Just now</div></div>
+      </div>
+      <div class="chat-input-bar">
+        <input class="chat-input" type="text" id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMsg()">
+        <button class="chat-send" onclick="sendChatMsg()"><i class="fa fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS PAGE -->
+<div id="page-notifications" class="page">
+  <div class="notif-layout">
+    <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between"><div class="page-title">Notifications</div><span style="font-size:13px;color:var(--green);cursor:pointer;font-weight:500">Mark all read</span></div>
+    <div class="notif-item unread"><div class="notif-icon green"><i class="fa fa-hand-pointer"></i></div><div class="notif-text"><p><strong>Piotr Nowak</strong> has requested your <strong>Wooden Dining Table</strong>.</p><div class="notif-time">2 minutes ago</div><div style="display:flex;gap:8px;margin-top:10px"><button class="action-btn" style="background:var(--green);color:white;border-color:var(--green)" onclick="showToast('Request accepted!')">Accept</button><button class="action-btn" onclick="showToast('Request declined.')">Decline</button></div></div></div>
+    <div class="notif-item unread"><div class="notif-icon amber"><i class="fa fa-star"></i></div><div class="notif-text"><p><strong>Anna Wiśniewska</strong> left you a 5-star review.</p><div class="notif-time">1 hour ago</div></div></div>
+    <div class="notif-item unread"><div class="notif-icon blue"><i class="fa fa-comment"></i></div><div class="notif-text"><p>New message from <strong>Tomasz B.</strong> about your <strong>IKEA Bookshelf</strong>.</p><div class="notif-time">3 hours ago</div><div style="margin-top:8px"><button class="action-btn" onclick="showPage('chat')">Open Chat</button></div></div></div>
+    <div class="notif-item"><div class="notif-icon green"><i class="fa fa-check-circle"></i></div><div class="notif-text"><p>Your listing <strong>Baby Stroller</strong> has been marked as given away. 🎉</p><div class="notif-time">Yesterday</div></div></div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div id="page-admin" class="page">
+  <div class="admin-layout">
+    <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between"><div><div class="page-title">Admin Dashboard</div><div class="page-sub">Moderation & platform overview</div></div><span style="font-size:12px;background:var(--green-pale);color:var(--green);padding:4px 12px;border-radius:99px;font-weight:500">🟢 All systems operational</span></div>
+    <div class="admin-grid">
+      <div class="admin-card"><div class="admin-card-num">2,841</div><div class="admin-card-lbl">Total Listings</div><div class="admin-card-trend">↑ +124 this week</div></div>
+      <div class="admin-card"><div class="admin-card-num">4,230</div><div class="admin-card-lbl">Registered Users</div><div class="admin-card-trend">↑ +56 this week</div></div>
+      <div class="admin-card"><div class="admin-card-num" style="color:var(--amber)">17</div><div class="admin-card-lbl">Pending Reports</div><div class="admin-card-trend" style="color:var(--amber)">Requires review</div></div>
+      <div class="admin-card"><div class="admin-card-num">12,480</div><div class="admin-card-lbl">Items Exchanged</div><div class="admin-card-trend">↑ +380 this week</div></div>
+    </div>
+    <div class="admin-nav">
+      <button class="admin-nav-btn active" onclick="switchAdminTab(this,'tab-listings')">Listings</button>
+      <button class="admin-nav-btn" onclick="switchAdminTab(this,'tab-users')">Users</button>
+      <button class="admin-nav-btn" onclick="switchAdminTab(this,'tab-reports')">Reports</button>
+    </div>
+    <div id="tab-listings">
+      <div class="admin-table">
+        <div class="admin-table-header"><h3>Recent Listings</h3><input type="text" placeholder="Search..." style="padding:6px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none"></div>
+        <table><thead><tr><th>Title</th><th>Category</th><th>User</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          <tr><td>Wooden Dining Table</td><td>Furniture</td><td>Marta K.</td><td>Mokotów</td><td><span class="status-pill active">Active</span></td><td><div class="action-btns"><button class="action-btn">View</button><button class="action-btn danger">Remove</button></div></td></tr>
+          <tr><td>iPhone 12 (cracked screen)</td><td>Electronics</td><td>Jan W.</td><td>Ursynów</td><td><span class="status-pill pending">Pending</span></td><td><div class="action-btns"><button class="action-btn">Approve</button><button class="action-btn danger">Reject</button></div></td></tr>
+          <tr><td>"Buy this NOW" post</td><td>Misc.</td><td>Unknown</td><td>—</td><td><span class="status-pill flagged">Flagged</span></td><td><div class="action-btns"><button class="action-btn danger" onclick="showToast('Listing removed.')">Remove</button></div></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div id="tab-users" style="display:none"><div class="admin-table"><div class="admin-table-header"><h3>Registered Users</h3></div><table><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Items Given</th><th>Trust Score</th><th>Status</th></tr></thead><tbody><tr><td>Marta Kowalska</td><td>marta@email.com</td><td>Jan 2023</td><td>23</td><td>94</td><td><span class="status-pill active">Active</span></td></tr><tr><td>Piotr Nowak</td><td>piotr@email.com</td><td>Mar 2023</td><td>7</td><td>78</td><td><span class="status-pill active">Active</span></td></tr><tr><td>Unknown User</td><td>spam@fake.com</td><td>Today</td><td>0</td><td>12</td><td><span class="status-pill flagged">Suspicious</span></td></tr></tbody></table></div></div>
+    <div id="tab-reports" style="display:none"><div class="admin-table"><div class="admin-table-header"><h3>Abuse Reports</h3></div><table><thead><tr><th>Report</th><th>Reported By</th><th>Date</th><th>Reason</th><th>Actions</th></tr></thead><tbody><tr><td>"Buy this NOW" post</td><td>3 users</td><td>Today</td><td>Spam / selling</td><td><div class="action-btns"><button class="action-btn danger" onclick="showToast('User warned and listing removed.')">Remove & Warn</button></div></td></tr></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal"><button class="modal-close" onclick="closeModal()"><i class="fa fa-times"></i></button>
+    <div id="modal-login"><h2>Welcome back</h2><p class="sub">Sign in to give, receive, and connect.</p><div class="form-group"><label>Email or Phone</label><input type="text" placeholder="you@email.com"></div><div class="form-group"><label>Password</label><input type="password" placeholder="••••••••"></div><button class="modal-btn" onclick="fakeLogin()">Sign In</button><div class="modal-switch">No account? <a onclick="switchModal('register')">Register free</a></div></div>
+    <div id="modal-register" style="display:none"><h2>Join Sharely</h2><p class="sub">It's free, always will be.</p><div class="form-group"><label>Full name</label><input type="text" placeholder="Your name"></div><div class="form-group"><label>Email</label><input type="text" placeholder="you@email.com"></div><div class="form-group"><label>Phone</label><input type="text" placeholder="+48 600 000 000"></div><div class="form-group"><label>Password</label><input type="password" placeholder="Min. 8 characters"></div><button class="modal-btn" onclick="fakeLogin()">Create Account</button><div class="modal-switch">Have an account? <a onclick="switchModal('login')">Sign in</a></div></div>
+  </div>
+</div>
+
+<!-- REQUEST MODAL -->
+<div class="request-modal" id="request-modal" onclick="if(event.target===this)closeRequestModal()">
+  <div class="inner"><h3>Request This Item</h3><p style="font-size:14px;color:var(--text-muted)">Tell the giver why you'd like this item. Personal messages get accepted more often!</p><textarea placeholder="Hi! I'd love this because..."></textarea><div style="display:flex;gap:10px;margin-top:14px"><button class="detail-btn primary" style="flex:1" onclick="submitRequest()"><i class="fa fa-paper-plane"></i> Send Request</button><button class="detail-btn secondary" style="padding:13px 18px" onclick="closeRequestModal()">Cancel</button></div></div>
+</div>
+
+<div class="toast" id="toast"><i class="fa fa-check-circle toast-icon"></i> <span id="toast-msg">Done!</span></div>
+
+<script>
+const LOCATIONS = [
+  {name:'Warsaw',district:'All districts',icon:'fa-city'},
+  {name:'Mokotów',district:'Warsaw district',icon:'fa-map-pin'},
+  {name:'Ursynów',district:'Warsaw district',icon:'fa-map-pin'},
+  {name:'Praga',district:'Warsaw district',icon:'fa-map-pin'},
+  {name:'Wola',district:'Warsaw district',icon:'fa-map-pin'},
+  {name:'Żoliborz',district:'Warsaw district',icon:'fa-map-pin'},
+  {name:'Śródmieście',district:'Warsaw district',icon:'fa-map-pin'},
+  {name:'Kraków',district:'Lesser Poland',icon:'fa-city'},
+  {name:'Gdańsk',district:'Pomerania',icon:'fa-city'},
+  {name:'Wrocław',district:'Lower Silesia',icon:'fa-city'},
+  {name:'Poznań',district:'Greater Poland',icon:'fa-city'},
+  {name:'Łódź',district:'Łódź Voivodeship',icon:'fa-city'},
+  {name:'Katowice',district:'Silesia',icon:'fa-city'},
+];
+
+let selectedLocation = 'Warsaw';
+let currentFilter = 'all';
+let currentPage = 'home';
+
+const listings = [
+  {id:1,title:'Wooden Dining Table',cat:'Furniture',emoji:'🪑',loc:'Mokotów',time:'2h ago',desc:'Beautiful solid wood table, seats 4–6. Some minor scratches. Must collect.'},
+  {id:2,title:'iPhone 12 (cracked screen)',cat:'Electronics',emoji:'📱',loc:'Ursynów',time:'3h ago',desc:'Working iPhone 12, cracked screen only. All functions work perfectly.'},
+  {id:3,title:'Baby Stroller Maclaren',cat:'Baby Items',emoji:'🍼',loc:'Wola',time:'5h ago',desc:'Maclaren Triumph in good condition, used 1 year.'},
+  {id:4,title:'IKEA BILLY Bookshelf',cat:'Furniture',emoji:'📚',loc:'Praga',time:'6h ago',desc:'Classic IKEA BILLY in white, 80cm wide. Some marks on sides.'},
+  {id:5,title:'Winter Jacket (L)',cat:'Clothes',emoji:'🧥',loc:'Żoliborz',time:'8h ago',desc:'Men\'s winter parka, size L. Warm, worn one season.'},
+  {id:6,title:'Blender Philips',cat:'Appliances',emoji:'🥤',loc:'Mokotów',time:'10h ago',desc:'Philips blender, 600W. Works perfectly.'},
+  {id:7,title:'Children\'s Bike 20"',cat:'Sports',emoji:'🚲',loc:'Ursynów',time:'1d ago',desc:'Kids\' bike for age 6–9. Pink with stabilisers.'},
+  {id:8,title:'Harry Potter Set (1–7)',cat:'Books',emoji:'📖',loc:'Śródmieście',time:'1d ago',desc:'Complete HP series in Polish. Some wear on spines.'},
+  {id:9,title:'Office Chair',cat:'Furniture',emoji:'💺',loc:'Ochota',time:'2d ago',desc:'Black mesh office chair, adjustable height.'},
+  {id:10,title:'Baby Monitor Motorola',cat:'Baby Items',emoji:'👶',loc:'Wola',time:'2d ago',desc:'Motorola video baby monitor. Works great.'},
+  {id:11,title:'Yoga Mat + Blocks',cat:'Sports',emoji:'🧘',loc:'Mokotów',time:'3d ago',desc:'Purple yoga mat and two cork blocks.'},
+  {id:12,title:'Cookbooks (x5)',cat:'Books',emoji:'🍳',loc:'Żoliborz',time:'3d ago',desc:'5 cooking books including Nigella, Jamie Oliver.'},
+];
+
+function buildLocList(containerId, query, context) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const filtered = query ? LOCATIONS.filter(l => l.name.toLowerCase().includes(query.toLowerCase())) : LOCATIONS;
+  el.innerHTML = filtered.map(l => `
+    <div class="loc-option ${l.name === selectedLocation ? 'selected' : ''}" onclick="selectLocation('${l.name}','${context}')">
+      <i class="fa ${l.icon}"></i>
+      <div style="flex:1"><div>${l.name}</div><div style="font-size:11px;color:var(--text-muted)">${l.district}</div></div>
+      ${l.name === selectedLocation ? '<i class="fa fa-check" style="color:var(--green);font-size:12px"></i>' : ''}
+    </div>
+  `).join('');
+}
+
+function initLocLists() {
+  buildLocList('nav-loc-list','','nav');
+  buildLocList('hero-loc-list','','hero');
+  buildLocList('explore-loc-list','','explore');
+}
+
+function filterLocOptions(query, context) {
+  buildLocList(context+'-loc-list', query, context);
+}
+
+function selectLocation(name, context) {
+  selectedLocation = name;
+  document.getElementById('nav-loc-text').textContent = name;
+  document.getElementById('hero-loc-text').textContent = name;
+  if(document.getElementById('explore-loc-text')) document.getElementById('explore-loc-text').textContent = name;
+  if(document.getElementById('home-city-label')) document.getElementById('home-city-label').textContent = name;
+  const exploreCount = document.getElementById('explore-count');
+  if(exploreCount) exploreCount.textContent = `Showing items near ${name}`;
+  ['nav','hero','explore'].forEach(ctx => {
+    const dd = document.getElementById(ctx+'-loc-dropdown');
+    if(dd) dd.classList.remove('open');
+  });
+  const navCaret = document.getElementById('nav-loc-caret');
+  if(navCaret) navCaret.style.transform = '';
+  showToast('📍 Location set to ' + name);
+  initLocLists();
+}
+
+function useMyLocation(context) {
+  showToast('📍 Detecting your location...');
+  setTimeout(() => { selectLocation('Warsaw', context); showToast('📍 Location set to Warsaw (detected)'); }, 1200);
+}
+
+function toggleNavLoc(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('nav-loc-dropdown');
+  const caret = document.getElementById('nav-loc-caret');
+  const isOpen = dd.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) {
+    dd.classList.add('open');
+    caret.style.transform = 'rotate(180deg)';
+    buildLocList('nav-loc-list','','nav');
+  }
+}
+
+function toggleHeroLoc(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('hero-loc-dropdown');
+  const isOpen = dd.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) { dd.classList.add('open'); buildLocList('hero-loc-list','','hero'); }
+}
+
+function toggleExploreLoc(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('explore-loc-dropdown');
+  const isOpen = dd.classList.contains('open');
+  closeAllDropdowns();
+  if (!isOpen) { dd.classList.add('open'); buildLocList('explore-loc-list','','explore'); }
+}
+
+function closeAllDropdowns() {
+  document.querySelectorAll('.loc-dropdown,.hero-loc-dropdown,.explore-loc-dropdown').forEach(d => d.classList.remove('open'));
+  const caret = document.getElementById('nav-loc-caret');
+  if (caret) caret.style.transform = '';
+}
+
+document.addEventListener('click', closeAllDropdowns);
+
+const radiusSlider = document.getElementById('radius-slider');
+if (radiusSlider) {
+  radiusSlider.addEventListener('input', function() {
+    const lbl = document.getElementById('explore-radius-label');
+    if (lbl) lbl.textContent = this.value + 'km';
+  });
+}
+
+function renderListings(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = items.map(item => `
+    <div class="listing-card" onclick="openDetail(${item.id})">
+      <div style="position:relative">
+        <div class="listing-emoji">${item.emoji}</div>
+        <span class="free-badge">FREE</span>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav(this)"><i class="fa fa-heart"></i></button>
+      </div>
+      <div class="listing-body">
+        <div class="listing-title">${item.title}</div>
+        <div class="listing-cat">${item.cat}</div>
+        <div class="listing-meta">
+          <span class="listing-loc"><i class="fa fa-map-marker-alt"></i> ${item.loc}</span>
+          <span class="listing-time">${item.time}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + name);
+  if (pg) { pg.classList.add('active'); currentPage = name; }
+  window.scrollTo(0, 0);
+  closeAllDropdowns();
+  if (name === 'home') renderListings('home-listings', listings.slice(0, 8));
+  if (name === 'explore') renderExplore();
+  if (name === 'profile') renderListings('profile-listings', listings.slice(0, 4));
+}
+
+function renderExplore() {
+  let items = currentFilter === 'all' ? listings : listings.filter(l => l.cat === currentFilter);
+  renderListings('explore-listings', items);
+  const count = document.getElementById('explore-count');
+  if (count) count.textContent = `Showing ${items.length} items near ${selectedLocation}`;
+}
+
+function setFilter(btn, cat) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = cat;
+  renderExplore();
+}
+
+function filterAndExplore(cat) {
+  currentFilter = cat;
+  showPage('explore');
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent.includes(cat));
+  });
+}
+
+function openDetail(id) {
+  const item = listings.find(l => l.id === id);
+  if (!item) return;
+  document.getElementById('detail-title').textContent = item.title;
+  document.getElementById('detail-img').textContent = item.emoji;
+  document.getElementById('detail-location').textContent = item.loc + ', ' + selectedLocation;
+  document.getElementById('detail-time').textContent = item.time;
+  document.getElementById('detail-desc').textContent = item.desc;
+  document.getElementById('detail-cat-info').textContent = item.cat;
+  document.getElementById('detail-loc-info').textContent = item.loc;
+  document.getElementById('detail-time-info').textContent = item.time;
+  document.getElementById('detail-fav-icon').className = 'fa fa-heart';
+  document.getElementById('detail-fav-text').textContent = 'Save to Favourites';
+  showPage('detail');
+}
+
+function goBack() { showPage(currentPage === 'detail' ? 'explore' : 'home'); }
+
+function toggleFav(btn) {
+  btn.classList.toggle('active');
+  const icon = btn.querySelector('i');
+  if (btn.classList.contains('active')) { icon.className = 'fas fa-heart'; showToast('Saved to favourites!'); }
+  else icon.className = 'fa fa-heart';
+}
+
+function toggleFavDetail(btn) {
+  const icon = document.getElementById('detail-fav-icon');
+  const txt = document.getElementById('detail-fav-text');
+  if (txt.textContent === 'Save to Favourites') { icon.className = 'fas fa-heart'; icon.style.color = 'var(--red)'; txt.textContent = 'Saved!'; showToast('Saved to favourites!'); }
+  else { icon.className = 'fa fa-heart'; icon.style.color = ''; txt.textContent = 'Save to Favourites'; }
+}
+
+function selectCat(el) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+const addLocSuggs = ['Warsaw, Poland','Mokotów, Warsaw','Ursynów, Warsaw','Praga, Warsaw','Wola, Warsaw','Żoliborz, Warsaw','Kraków, Poland','Gdańsk, Poland','Wrocław, Poland'];
+function showAddLocSugg() {
+  const el = document.getElementById('add-loc-suggestions');
+  el.style.display = 'block';
+  el.innerHTML = addLocSuggs.map(s => `<div onclick="pickAddLoc('${s}')" style="padding:9px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background 0.12s;border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--green-pale)'" onmouseout="this.style.background=''"><i class="fa fa-map-marker-alt" style="color:var(--green);font-size:12px"></i>${s}</div>`).join('');
+  document.addEventListener('click', hideAddLoc);
+}
+function pickAddLoc(val) {
+  document.getElementById('add-loc-input').value = val;
+  document.getElementById('add-loc-suggestions').style.display = 'none';
+}
+function hideAddLoc(e) {
+  if (!e.target.closest('#add-loc-suggestions') && e.target.id !== 'add-loc-input') {
+    document.getElementById('add-loc-suggestions').style.display = 'none';
+    document.removeEventListener('click', hideAddLoc);
+  }
+}
+
+function submitListing() { showToast('🎉 Your listing is live!'); setTimeout(() => showPage('explore'), 1500); }
+function openModal(type) { document.getElementById('auth-modal').classList.add('open'); document.getElementById('modal-login').style.display = type==='login'?'':'none'; document.getElementById('modal-register').style.display = type==='register'?'':'none'; }
+function closeModal() { document.getElementById('auth-modal').classList.remove('open'); }
+function switchModal(type) { openModal(type); }
+function fakeLogin() { closeModal(); showToast('Welcome to Sharely! 🌱'); }
+function openRequestModal() { document.getElementById('request-modal').classList.add('open'); }
+function closeRequestModal() { document.getElementById('request-modal').classList.remove('open'); }
+function submitRequest() { closeRequestModal(); showToast('Request sent! You\'ll hear back soon 🤞'); }
+function sendChatMsg() {
+  const input = document.getElementById('chat-input');
+  const txt = input.value.trim();
+  if (!txt) return;
+  const msgs = document.getElementById('chat-messages');
+  const now = new Date();
+  const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const div = document.createElement('div');
+  div.className = 'msg me';
+  div.innerHTML = `<div class="msg-bubble">${txt}</div><div class="msg-time">${time}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  input.value = '';
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+function switchAdminTab(btn, tabId) {
+  document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['tab-listings','tab-users','tab-reports'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = id===tabId?'':'none'; });
+}
+document.querySelector('.logo').addEventListener('dblclick', () => showPage('admin'));
+
+initLocLists();
+renderListings('home-listings', listings.slice(0, 8));
+</script>
+</body>
+</html>
